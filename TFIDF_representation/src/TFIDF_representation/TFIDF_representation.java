@@ -1,5 +1,6 @@
 
 package TFIDF_representation;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,8 +46,8 @@ public interface TFIDF_representation {
          * @return the TF-IDF of term
          */
         double tfIdf(List<String> doc, List<List<String>> docs, String term) {
-            System.out.println("TF ("+ term+") = " + tf(doc,term));
-            System.out.println("IDF ("+ term+") = " + idf(docs,term));
+            System.out.println("\tTF ("+ term+") = " + tf(doc,term));
+            System.out.println("\tIDF ("+ term+") = " + idf(docs,term)+"\n\n");
             return tf(doc, term) * idf(docs, term);
 
         }
@@ -61,8 +62,18 @@ public interface TFIDF_representation {
         List<List<String>> documents = Arrays.asList(doc1, doc2, doc3);
 
         TFIDFCalculator calculator = new TFIDFCalculator();
-        double tfidf = calculator.tfIdf(doc1, documents, "ipsum");
-        System.out.println("TF-IDF (ipsum) = " + tfidf);
-
+        List<List<Double>> TFIDF_representations = new ArrayList<>();
+        for(List<String> doc : documents){
+            List<Double> docrepr = new ArrayList<>();
+            for(String word : doc){
+                double word_tfidf = calculator.tfIdf(doc, documents, word);
+                docrepr.add(word_tfidf);
+            }
+            TFIDF_representations.add(docrepr);
+        }
+        System.out.println("Printing TF-IDF representations");
+        for(List<Double> repr : TFIDF_representations){
+            System.out.println(repr);
+        }
     }
 }
