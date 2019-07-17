@@ -33,7 +33,7 @@ public class Interface{
         String mallet_instances_path = directory_path+"/content.txt";
         Probabilistic_Representation model; // Run the topic model representation
         model = new Probabilistic_Representation(mallet_instances_path,topics_num,stop_words_path);
-        HashMap<String,Double> TermTopicContribution = model.getTermTopicContribution();
+        HashMap<String,Vector<Double>> TermTopicContribution = model.getTermTopicContribution();
         File file = new File(mallet_instances_path);
         BufferedReader br = new BufferedReader(new FileReader(file));
 
@@ -41,7 +41,7 @@ public class Interface{
 
         while ((line = br.readLine()) != null){
             String[] terms = line.split(DELIMITER);
-            ArrayList<Double> values = new ArrayList<>();
+            ArrayList<Vector<Double>> values = new ArrayList<>();
             for(String term : terms){
                 term = term.toLowerCase();
                 if(TermTopicContribution.containsKey(term)) {
@@ -49,7 +49,7 @@ public class Interface{
                 }
                 else{
                     System.out.println("\t"+term+" not represented");
-                    values.add(0.0);
+                   // values.add(new Vector<>(topics_num));
                 }
             }
             System.out.println(values);
