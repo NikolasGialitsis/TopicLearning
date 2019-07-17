@@ -1,8 +1,11 @@
 
-package TFIDF_representation;
+package Representations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+/**
+ * @author nikolas
+ */
 
 public interface TFIDF_representation {
 
@@ -59,13 +62,14 @@ public interface TFIDF_representation {
         List<String> doc1 = Arrays.asList("Lorem", "ipsum", "dolor", "ipsum", "sit", "ipsum");
         List<String> doc2 = Arrays.asList("Vituperata", "incorrupte", "at", "ipsum", "pro", "quo");
         List<String> doc3 = Arrays.asList("Has", "persius", "disputationi", "id", "simul");
-        List<List<String>> documents = Arrays.asList(doc1, doc2, doc3);
 
+        List<List<String>> documents = Arrays.asList(doc1, doc2, doc3);
         TFIDFCalculator calculator = new TFIDFCalculator();
         List<List<Double>> TFIDF_representations = new ArrayList<>();
         for(List<String> doc : documents){
             List<Double> docrepr = new ArrayList<>();
             for(String word : doc){
+                word = word.toLowerCase();
                 double word_tfidf = calculator.tfIdf(doc, documents, word);
                 docrepr.add(word_tfidf);
             }
