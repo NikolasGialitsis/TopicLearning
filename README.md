@@ -9,4 +9,10 @@
 * ### Contribution of word to probabilistic topics (done with demo input from file- to check tokenizations)
   + Probabilistically estimate X topics
   + for each term calculate X contributions to topics
-  + for each term sum up its contributions
+  + represent each term as a vector of contributions, <c1,c2,...cX>
+
+# Neural Network Classifier
+## LSTM RNN 
+### Supervised learning - input dataset of sentences with labels (keep/not to keep)
++ Evaluate the two representations
++ Compare results between languages
