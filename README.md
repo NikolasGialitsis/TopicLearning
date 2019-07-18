@@ -1,4 +1,4 @@
-#Sequence Encoding
+# Sequence Encoding
 Implemented two word representations
 * Representations (done -to be implemented with input from file or tokenization)
   
