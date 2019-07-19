@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.regex.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Vector;
 /**
  * @author nikolas
  */
@@ -32,7 +32,7 @@ class Probabilistic_Representation {
 
 
 
-    HashMap<String,Double> getTermTopicContribution() throws IOException {
+    HashMap<String,Vector<Double>> getTermTopicContribution() throws IOException {
 
         // Begin by importing documents from text to feature sequences
         ArrayList<Pipe> pipeList = new ArrayList<>();
@@ -89,14 +89,23 @@ class Probabilistic_Representation {
             }
         }
 
-        HashMap<String,Double> TermRepresentations = new HashMap<>();
+        HashMap<String,Vector<Double>> TermRepresentations = new HashMap<>();
+        int topic_id = 0;
         for(HashMap<String,Double> TopicMap : this.TermTopicContribution){
             for(String term : TopicMap.keySet()) {
                 double contribution_to_topic_percent = TopicMap.get(term);
-                TermRepresentations.putIfAbsent(term, 0.0);
-                double new_contr = TermRepresentations.get(term) + contribution_to_topic_percent;
-                TermRepresentations.put(term, new_contr);
+                if(!TermRepresentations.containsKey(term)){
+                    Vector<Double> v = new Vector<>();
+                    for(int i = 0 ; i < topics_num ; i++){
+                        v.add(0.0);
+                    }
+                    TermRepresentations.put(term,v);
+                }
+                Vector<Double> vect = TermRepresentations.get(term);
+                vect.set(topic_id,contribution_to_topic_percent);
+                TermRepresentations.put(term,vect);
             }
+            topic_id = topic_id + 1;
         }
         return TermRepresentations;
     }

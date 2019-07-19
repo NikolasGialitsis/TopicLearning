@@ -39,20 +39,24 @@ public class Interface{
 
         String line;
 
+        ArrayList<Vector<Vector<Double>>> sentence_representations = new ArrayList<>();
         while ((line = br.readLine()) != null){
             String[] terms = line.split(DELIMITER);
-            ArrayList<Vector<Double>> values = new ArrayList<>();
+            Vector<Vector<Double>> sentence = new Vector<>();
             for(String term : terms){
                 term = term.toLowerCase();
                 if(TermTopicContribution.containsKey(term)) {
-                    values.add(TermTopicContribution.get(term));
+                    sentence.add(TermTopicContribution.get(term));
                 }
                 else{
                     System.out.println("\t"+term+" not represented");
                    // values.add(new Vector<>(topics_num));
                 }
             }
-            System.out.println(values);
+            sentence_representations.add(sentence);
+        }
+        for(Vector<Vector<Double>> sentence : sentence_representations){
+            System.out.println(sentence);
         }
     }
 }
