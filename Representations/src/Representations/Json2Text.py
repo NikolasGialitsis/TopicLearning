@@ -16,17 +16,19 @@ for sentence in values['data']['train']:
     documents[document_id].append((text,label))
 
 
-f = open("/home/superuser/SequenceEncoding/Representations/dataset.txt", "a")
-
+f1 = open("/home/superuser/SequenceEncoding/Representations/dataset.txt", "w+")
+f2 = open("/home/superuser/SequenceEncoding/Representations/sentences.txt", "w+")
 for document in documents.keys():
     sentences = documents[document]
-    f.write('Document '+ str(document) + ' ' + str(len(sentences)))
-    f.write('\n')
+    f1.write('Document '+ str(document) + ' ' + str(len(sentences)))
+    f1.write('\n')
     for sentence in sentences:
         sentence_text = sentence[0]
         sentence_text = sentence_text.encode('utf8')
         sentence_label = sentence[1]
-        f.write("[%s]" % sentence_text)
-        f.write("[%s]\n" % sentence_label)
-f.close()
+        f1.write("[%s]" % sentence_text)
+        f1.write("[%s]\n" % sentence_label)
+        f2.write("%s " % sentence_text)
+f1.close()
+f2.close()
 JsonFile.close()
