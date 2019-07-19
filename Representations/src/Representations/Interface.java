@@ -41,20 +41,27 @@ public class Interface{
 
         ArrayList<Vector<Vector<Double>>> sentence_representations = new ArrayList<>();
 
+        BufferedWriter writer = new BufferedWriter(new FileWriter(directory_path+"/prob_repr.dat"));
+        BufferedWriter writer2 = new BufferedWriter(new FileWriter(directory_path+"/prob_labels.dat"));
         File file = new File(directory_path+"/dataset.txt");
         BufferedReader br = new BufferedReader(new FileReader(file));
+        int max_sentence_words = -1;
         while ((line = br.readLine()) != null){
             StringTokenizer defaultTokenizer = new StringTokenizer(line);
             defaultTokenizer.nextToken();
             int document_id = Integer.parseInt(defaultTokenizer.nextToken());
             int sentences_num = Integer.parseInt(defaultTokenizer.nextToken());
             System.out.println("Document "+document_id+ ' '+ sentences_num);
+
             for(int i = 0 ; i < sentences_num ; i++) {
                 line = br.readLine();
-                String[] fields = line.split("\\[|\\[");
+                String[] fields = line.split("\\[|\\]");
                 String text  = fields[1];
                 String[] terms = text.split(DELIMITER);
                 Vector<Vector<Double>> sentence = new Vector<>();
+                if(terms.length > max_sentence_words){
+                    max_sentence_words = terms.length;
+                }
                 for (String term : terms) {
                     term = term.toLowerCase();
                     if (TermTopicContribution.containsKey(term)) {
@@ -62,8 +69,24 @@ public class Interface{
                     }
                 }
                 System.out.println("\t"+sentence);
+                writer2.write(fields[4]+"\n");
                 sentence_representations.add(sentence);
             }
         }
+
+        Vector<Double> pad_vector = new Vector<>();
+        for(int i = 0 ; i < topics_num ; i++){
+            pad_vector.add(0.0);
+        }
+        for(Vector<Vector<Double>> sentence : sentence_representations ){
+            int sentence_words = sentence.size();
+            while(sentence_words < max_sentence_words){
+                sentence.add(pad_vector);
+                sentence_words++;
+            }
+            writer.write(sentence+"\n");
+        }
+        writer.close();
+        writer2.close();
     }
 }
