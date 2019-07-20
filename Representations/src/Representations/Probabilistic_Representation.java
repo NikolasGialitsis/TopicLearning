@@ -1,4 +1,3 @@
-package Representations;
 import cc.mallet.types.*;
 import cc.mallet.pipe.*;
 import cc.mallet.pipe.iterator.*;

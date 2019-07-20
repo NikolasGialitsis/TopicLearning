@@ -1,6 +1,8 @@
 #basic libraries
 import numpy as np
-from keras.layers import LSTM, Dense, TimeDistributed
+import sys
+
+from keras.layers import LSTM, Dense, TimeDistributed,Activation,Input
 from ast import literal_eval
 import numpy
 import pandas
@@ -31,7 +33,8 @@ from sklearn.decomposition import PCA
 
 import tensorflow as tf
 
-text_file = open("/home/superuser/SequenceEncoding/Representations/prob_repr.dat", "r")
+
+text_file = open("/home/superuser/SequenceEncoding/Representations/tfidf_repr.dat", "r")
 instances_concat = text_file.readlines()
 num_steps = -1
 instances = []
@@ -42,7 +45,7 @@ for instance in instances_concat:
     instances.append(vec)
 
 text_file.close()
-labels_file = open("/home/superuser/SequenceEncoding/Representations/prob_labels.dat", "r")
+labels_file = open("/home/superuser/SequenceEncoding/Representations/tfidf_labels.dat", "r")
 labels  = labels_file.readlines()
 labels_file.close()
 
@@ -57,12 +60,14 @@ labels = integer_encoded
 def learning_model(): #Neural Network Architecture#
     global input_dim
     global num_steps
+    global input
     model = Sequential()
     print 'dim '+str(input_dim)
     print 'steps '+str(num_steps)
-    model.add(LSTM(200, input_shape=(num_steps, input_dim),dropout=0.2, recurrent_dropout=0.2))
+    input_shape=(num_steps,input_dim)
+    model.add(LSTM(200, input_shape=input_shape,dropout=0.2, recurrent_dropout=0.2))
     model.add(Dense(200))
-    model.add(Dense(1, activation='sigmoid'))
+    model.add(Dense(1,activation='softmax'))
     model.compile(loss="binary_crossentropy", optimizer="adam",metrics=['accuracy'])
     print model.summary()
     return model
@@ -79,10 +84,15 @@ batches = 64
 x_train = np.array(x_train)
 x_test = np.array(x_test)
 y_train = np.array(y_train)
+print y_train
 y_test= np.array(y_test)
 non_linear_model = learning_model()
-es = EarlyStopping(monitor='binary_crossentropy', mode='min', verbose=0, patience=30)
+es = EarlyStopping(monitor='acc_loss', mode='min', verbose=0, patience=30)
 non_linear_model.fit(x =np.array(x_train),y=np.array(y_train),epochs=epochs, batch_size=batches,validation_data=(x_test,y_test),callbacks=[es])
 # Final evaluation of the model
-scores = non_linear_model.evaluate(x_test, y_test, verbose=0)
-print("Accuracy: %.2f%%" % (scores[1]*100))
+
+y_pred =non_linear_model.predict(x_test)
+
+from sklearn.metrics import f1_score
+print 'f1 score macro ' + str(f1_score(y_test, y_pred, average='macro'))
+print 'f1 score micro ' + str(f1_score(y_test, y_pred, average='micro'))

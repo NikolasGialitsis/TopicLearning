@@ -1,4 +1,3 @@
-package Representations;
 import java.util.*;
 import java.io.*;
 /**
@@ -6,7 +5,7 @@ import java.io.*;
  */
 
 
-public class Interface{
+public class Probabilistic_Interface {
 
 
     private static final String DELIMITER = " ";
