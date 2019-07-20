@@ -81,18 +81,17 @@ batches = 64
 
 #partition dataset
 (x_train, x_test,y_train,y_test) = train_test_split(instances,labels, test_size=0.2, random_state=seed)
+non_linear_model = learning_model()
+es = EarlyStopping(monitor='loss', mode='min', verbose=0)
 x_train = np.array(x_train)
 x_test = np.array(x_test)
 y_train = np.array(y_train)
-print y_train
-y_test= np.array(y_test)
-non_linear_model = learning_model()
-es = EarlyStopping(monitor='acc_loss', mode='min', verbose=0, patience=30)
-non_linear_model.fit(x =np.array(x_train),y=np.array(y_train),epochs=epochs, batch_size=batches,validation_data=(x_test,y_test),callbacks=[es])
+y_test = np.array(y_test)
+non_linear_model.fit(x =x_train,y=y_train,epochs=epochs, batch_size=batches,validation_data=(x_test,y_test),callbacks=[es])
 # Final evaluation of the model
 
 y_pred =non_linear_model.predict(x_test)
-
 from sklearn.metrics import f1_score
+#print set(y_test) - set(y_pred)
 print 'f1 score macro ' + str(f1_score(y_test, y_pred, average='macro'))
 print 'f1 score micro ' + str(f1_score(y_test, y_pred, average='micro'))

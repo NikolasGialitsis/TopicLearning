@@ -76,7 +76,7 @@ public class TFIDF_Representation {
 
         BufferedWriter writer2 = new BufferedWriter(new FileWriter(directory_path+"/tfidf_labels.dat"));
 
-
+        ArrayList<Vector<Vector<String>>> init_sentences = new ArrayList<>();
         while ((line = br.readLine()) != null){
             StringTokenizer defaultTokenizer = new StringTokenizer(line);
             defaultTokenizer.nextToken();
@@ -84,21 +84,30 @@ public class TFIDF_Representation {
             int sentences_num = Integer.parseInt(defaultTokenizer.nextToken());
             System.out.println("Document "+document_id+ ' '+ sentences_num);
             List<String> document = new ArrayList<>();
+
+            Vector<Vector<String>> sentences = new Vector<>();
             for(int i = 0 ; i < sentences_num ; i++) {
                 line = br.readLine();
-                String[] fields = line.split("\\[|\\]");
+                String[] fields = line.split("[\\[|\\]]");
                 String text  = fields[1];
                 writer2.write(fields[4]+"\n");
                 String[] terms = text.split(DELIMITER);
-
-                for(String term : terms){
-                    document.add(term+" ");
+                Vector<String> sentence = new Vector<>();
+                int words_num = 0;
+                for(String term : terms) {
+                    document.add(term + " ");
+                    sentence.add(term);
+                    words_num = words_num + 1;
                 }
+                if(words_num > max_sentence_words){
+                    max_sentence_words = words_num;
+                }
+                sentences.add(sentence);
                 document.add("\n");
 
             }
+            init_sentences.add(sentences);
             documents.add(document);
-            System.out.println(document);
         }
 
 
@@ -106,45 +115,38 @@ public class TFIDF_Representation {
         BufferedWriter writer = new BufferedWriter(new FileWriter(directory_path+"/tfidf_repr.dat"));
 
         TFIDFCalculator calculator = new TFIDFCalculator();
-        ArrayList<Vector<Double>> TFIDF_representations = new ArrayList<>();
+        ArrayList<HashMap<String,Double>> TFIDF_representations = new ArrayList<>();
+        int document_id = 0;
         for(List<String> doc : documents){
-            Vector<Double> docrepr = new Vector<>();
+            HashMap<String,Double> docmap = new HashMap<>();
             for(String word : doc){
                 word = word.toLowerCase();
                 double word_tfidf = calculator.tfIdf(doc, documents, word);
-                docrepr.add(word_tfidf);
+                word = word.replaceAll("\\s+$", "");
+                System.out.println("Insert D"+document_id+ " /"+word+":"+word_tfidf + "len("+word.length()+")");
+                docmap.put(word,word_tfidf);
             }
-            TFIDF_representations.add(docrepr);
+            document_id = document_id + 1;
+            TFIDF_representations.add(docmap);
         }
 
 
         ArrayList<Vector<Vector<Double>>> sentence_representations = new ArrayList<>();
 
-        max_sentence_words = -1;
-        for(List<Double> docrepr : TFIDF_representations) {
-            String docstr = "";
-            for(double d : docrepr){
-                docstr = docstr + d + " ";
-            }
-            StringTokenizer Tokenizer = new StringTokenizer(docstr, "\n");
-            while (Tokenizer.hasMoreTokens()) {
-                Vector<Vector<Double>> sentence = new Vector<>();
-
-                int sentence_words = 0;
-                String s = Tokenizer.nextToken();
-                StringTokenizer tk2 = new StringTokenizer(s," ,");
-                while (tk2.hasMoreTokens()) {
-                    String s2 = tk2.nextToken();
-                    double val = Double.parseDouble(s2);
-                    sentence_words = sentence_words + 1;
+        for (int doc_id = 0 ; doc_id < document_id ; doc_id++){
+            Vector<Vector<String>> doc = init_sentences.get(doc_id);
+            for (Vector<String> sentence : doc) {
+                Vector<Vector<Double>> tfidf_sequence = new Vector<>();
+                for (String word : sentence) {
+                    word = word.toLowerCase();
+                    System.out.println("looking for "+word+" in D"+doc_id+ "len("+word.length()+")");
+                    double word_repr = TFIDF_representations.get(doc_id).get(word);
+                    System.out.println("word repr " + word_repr);
                     Vector<Double> dummy = new Vector<>();
-                    dummy.add(val);
-                    sentence.add(dummy);
+                    dummy.add(word_repr);
+                    tfidf_sequence.add(dummy);
                 }
-                if (sentence_words > max_sentence_words) {
-                    max_sentence_words = sentence_words;
-                }
-                sentence_representations.add(sentence);
+                sentence_representations.add(tfidf_sequence);
             }
         }
 
@@ -155,8 +157,7 @@ public class TFIDF_Representation {
             while(sentence_words < max_sentence_words){
                 sentence.add(pad_vector);
                 sentence_words++;
-            }
-            System.out.println(sentence.size());
+            };
             writer.write(sentence+"\n");
         }
         writer.close();
