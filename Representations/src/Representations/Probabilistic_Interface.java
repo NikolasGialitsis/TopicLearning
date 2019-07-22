@@ -7,7 +7,24 @@ import java.io.*;
 
 public class Probabilistic_Interface {
 
+    private static Vector<Vector<Double>> normalize_vectors(Vector<Vector<Double>> vectors){
 
+        Vector<Vector<Double>> new_v = new Vector<>();
+        for(int i = 0 ; i < vectors.size(); i++){
+            double sum = 0.0;
+            Vector<Double> vector = vectors.get(i);
+            for(double val : vector){
+                sum = sum + val;
+            }
+            for(int j = 0 ; j < vector.size() ; j++){
+                if(vector.get(j) == 0 )continue;
+
+                vector.set(j,(vector.get(j)*1.0)/(sum));
+            }
+            new_v.add(vector);
+        }
+        return new_v;
+    }
     private static final String DELIMITER = " ";
     public static void main(String[] args) throws Exception {
 
@@ -58,6 +75,7 @@ public class Probabilistic_Interface {
                 String text  = fields[1];
                 String[] terms = text.split(DELIMITER);
                 Vector<Vector<Double>> sentence = new Vector<>();
+
                 if(terms.length > max_sentence_words){
                     max_sentence_words = terms.length;
                 }
@@ -69,6 +87,7 @@ public class Probabilistic_Interface {
                 }
                 System.out.println("\t"+sentence);
                 writer2.write(fields[4]+"\n");
+                sentence = normalize_vectors(sentence);
                 sentence_representations.add(sentence);
             }
         }

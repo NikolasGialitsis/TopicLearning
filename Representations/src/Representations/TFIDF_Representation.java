@@ -7,6 +7,24 @@ import java.util.*;
  */
 
 public class TFIDF_Representation {
+    private static Vector<Vector<Double>> normalize_vectors(Vector<Vector<Double>> vectors){
+
+        Vector<Vector<Double>> new_v = new Vector<>();
+        for(int i = 0 ; i < vectors.size(); i++){
+            double sum = 0.0;
+            Vector<Double> vector = vectors.get(i);
+            for(double val : vector){
+                sum = sum + val;
+            }
+            for(int j = 0 ; j < vector.size() ; j++){
+                if(vector.get(j) == 0 )continue;
+
+                vector.set(j,(vector.get(j)*1.0)/(sum));
+            }
+            new_v.add(vector);
+        }
+        return new_v;
+    }
     private static final String DELIMITER = " ";
     public static class TFIDFCalculator {
         /**
@@ -105,6 +123,7 @@ public class TFIDF_Representation {
                 if(words_num > max_sentence_words){
                     max_sentence_words = words_num;
                 }
+
                 sentences.add(sentence);
                 document.add("\n");
 

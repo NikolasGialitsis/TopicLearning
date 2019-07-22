@@ -13,7 +13,12 @@ import java.util.Vector;
  * @author nikolas
  */
 
+
+
+
+
 class Probabilistic_Representation {
+
 
     private String instances_path;
     private int instances_num;
@@ -106,6 +111,8 @@ class Probabilistic_Representation {
             }
             topic_id = topic_id + 1;
         }
+
+
         return TermRepresentations;
     }
 
