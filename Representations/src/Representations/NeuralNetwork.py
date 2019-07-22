@@ -68,7 +68,7 @@ def learning_model(): #Neural Network Architecture#
     input_shape=(num_steps,input_dim)
     model.add(LSTM(200, input_shape=input_shape,dropout=0.2, recurrent_dropout=0.2))
     model.add(Dense(200))
-    model.add(Dense(2,activation='softmax'))
+    model.add(Dense(1,activation='softmax'))
     model.compile(loss="binary_crossentropy", optimizer="adam",metrics=['accuracy'])
     print model.summary()
     return model
