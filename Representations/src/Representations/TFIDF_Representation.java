@@ -88,13 +88,16 @@ public class TFIDF_Representation {
             Vector<Vector<String>> sentences = new Vector<>();
             for(int i = 0 ; i < sentences_num ; i++) {
                 line = br.readLine();
-                String[] fields = line.split("[\\[|\\]]");
+                String[] fields = line.split("\\[|\\]");
+                System.out.println(fields[0]);
+                System.out.println(fields[1]);
                 String text  = fields[1];
                 writer2.write(fields[4]+"\n");
                 String[] terms = text.split(DELIMITER);
                 Vector<String> sentence = new Vector<>();
                 int words_num = 0;
                 for(String term : terms) {
+                    if(term == "" || term == " ")continue;
                     document.add(term + " ");
                     sentence.add(term);
                     words_num = words_num + 1;
@@ -123,7 +126,8 @@ public class TFIDF_Representation {
                 word = word.toLowerCase();
                 double word_tfidf = calculator.tfIdf(doc, documents, word);
                 word = word.replaceAll("\\s+$", "");
-                System.out.println("Insert D"+document_id+ " /"+word+":"+word_tfidf + "len("+word.length()+")");
+                if(word_tfidf == 0.0)System.out.println("\t 0 > "+word);
+                System.out.println("Insert D"+document_id+ " /"+word+":"+word_tfidf) ;
                 docmap.put(word,word_tfidf);
             }
             document_id = document_id + 1;
@@ -139,7 +143,8 @@ public class TFIDF_Representation {
                 Vector<Vector<Double>> tfidf_sequence = new Vector<>();
                 for (String word : sentence) {
                     word = word.toLowerCase();
-                    System.out.println("looking for "+word+" in D"+doc_id+ "len("+word.length()+")");
+                    if(word == "" || word == " ")continue;
+                    System.out.println("looking for "+word+" in D"+doc_id);
                     double word_repr = TFIDF_representations.get(doc_id).get(word);
                     System.out.println("word repr " + word_repr);
                     Vector<Double> dummy = new Vector<>();

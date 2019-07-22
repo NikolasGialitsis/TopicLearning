@@ -106,5 +106,6 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="Python 2.7 (SequenceEncoding) interpreter library" level="application" />
   </component>
 </module>
