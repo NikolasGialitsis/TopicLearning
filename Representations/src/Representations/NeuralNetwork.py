@@ -4,6 +4,8 @@ import sys
 
 from keras.layers import LSTM, Dense, TimeDistributed,Activation,Input
 from ast import literal_eval
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import StratifiedKFold
 import numpy
 import pandas
 import scipy
@@ -15,6 +17,7 @@ from mpl_toolkits.mplot3d import Axes3D
 #Deep learning modules
 from keras.models import Sequential
 from keras.layers import Dense
+from keras.layers import Flatten
 from sklearn.model_selection import train_test_split
 
 from keras import models
@@ -56,8 +59,8 @@ from sklearn.preprocessing import OneHotEncoder
 label_encoder = LabelEncoder()
 integer_encoded = label_encoder.fit_transform(labels)
 labels = integer_encoded
-
-
+print 'Instances num = '+ str(len(instances))
+print 'Labels num = ' + str(len(labels))
 def learning_model(): #Neural Network Architecture#
     global input_dim
     global num_steps
@@ -66,11 +69,11 @@ def learning_model(): #Neural Network Architecture#
     print 'dim '+str(input_dim)
     print 'steps '+str(num_steps)
     input_shape=(num_steps,input_dim)
-    model.add(LSTM(200, input_shape=input_shape,dropout=0.2, recurrent_dropout=0.2))
-    model.add(Dense(200))
-    model.add(Dense(1,activation='softmax'))
+    #model.add(LSTM(10, input_shape=input_shape,dropout=0.2, recurrent_dropout=0.2))
+    model.add(Dense(10,input_shape=input_shape))
+    model.add(Dense(10))
+    model.add(Dense(2,activation='softmax'))
     model.compile(loss="binary_crossentropy", optimizer="adam",metrics=['accuracy'])
-    print model.summary()
     return model
 
 # def learning_model(): #Neural Network Architecture#
@@ -90,24 +93,43 @@ def learning_model(): #Neural Network Architecture#
 
 # fix random seed for reproducibility
 
-epochs = 5
+epochs = 1
 seed = 111
 batches = 64
 
 #partition dataset
-(x_train, x_test,y_train,y_test) = train_test_split(instances,labels, test_size=0.2, random_state=seed)
-# non_linear_model = learning_model()
-non_linear_model = learning_model()
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=0,patience=5)
-x_train = np.array(x_train)
-x_test = np.array(x_test)
-y_train = np.array(y_train)
-y_test = np.array(y_test)
-non_linear_model.fit(x =x_train,y=y_train,epochs=epochs, batch_size=batches,validation_data=(x_test,y_test),callbacks=[es])
-# Final evaluation of the model
 
-y_pred =non_linear_model.predict(x_test)
+
+skf = StratifiedKFold(n_splits=10)
 from sklearn.metrics import f1_score
-#print set(y_test) - set(y_pred)
-print 'f1 score macro ' + str(f1_score(y_test, y_pred, average='macro'))
-print 'f1 score micro ' + str(f1_score(y_test, y_pred, average='micro'))
+instances = np.array(instances)
+labels = np.array(labels)
+for train_index, test_index in skf.split(instances, labels):
+    #print("TRAIN:", train_index, "TEST:", test_index)
+    x_train, x_test = instances[train_index], instances[test_index]
+    y_train, y_test = labels[train_index], labels[test_index]
+    print '---- XTRAIN ----\n'+str(x_train[0])
+    print '---- YTRAIN ----\n'+str(y_train[0])
+
+    non_linear_model = learning_model()
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=0,patience=5)
+    x_train = np.array(x_train)
+    x_test = np.array(x_test)
+    y_train = np.array(y_train)
+    y_test = np.array(y_test)
+    non_linear_model.fit(x =x_train,y=y_train,epochs=epochs, batch_size=batches,validation_data=(x_test,y_test),callbacks=[es])
+    # Final evaluation of the model
+    print non_linear_model.summary()
+    y_pred =non_linear_model.predict(x_test)
+
+    #print set(y_test) - set(y_pred)
+    print ('f1 score macro ' + str(f1_score(y_test, y_pred, average='macro')))
+    print ('f1 score micro ' + str(f1_score(y_test, y_pred, average='micro')))
+    print ('Confusion matrix:\n' + str(confusion_matrix(y_test, y_pred)))
+
+
+#(x_train, x_test,y_train,y_test) = train_test_split(instances,labels, test_size=0.2, random_state=seed)
+# non_linear_model = learning_model()
+
+
+
