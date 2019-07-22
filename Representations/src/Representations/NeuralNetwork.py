@@ -27,6 +27,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.model_selection import train_test_split
+from sklearn.dummy import  DummyClassifier
 from sklearn.model_selection import KFold
 from sklearn.metrics import r2_score
 from sklearn.decomposition import PCA
@@ -57,21 +58,6 @@ integer_encoded = label_encoder.fit_transform(labels)
 labels = integer_encoded
 
 
-def learning_model_NN(): #Neural Network Architecture#
-    global input_dim
-    global num_steps
-    global input
-    model = Sequential()
-    print 'dim '+str(input_dim)
-    print 'steps '+str(num_steps)
-    input_shape=(num_steps,input_dim)
-    model.add(LSTM(200, input_shape=input_shape,dropout=0.2, recurrent_dropout=0.2))
-    model.add(Dense(200))
-    model.add(Dense(2,activation='softmax'))
-    model.compile(loss="binary_crossentropy", optimizer="adam",metrics=['accuracy'])
-    print model.summary()
-    return model
-
 def learning_model(): #Neural Network Architecture#
     global input_dim
     global num_steps
@@ -87,6 +73,21 @@ def learning_model(): #Neural Network Architecture#
     print model.summary()
     return model
 
+# def learning_model(): #Neural Network Architecture#
+#     global input_dim
+#     global num_steps
+#     global input
+#     model = Sequential()
+#     print 'dim '+str(input_dim)
+#     print 'steps '+str(num_steps)
+#     input_shape=(num_steps,input_dim)
+#     model.add(LSTM(200, input_shape=input_shape,dropout=0.2, recurrent_dropout=0.2))
+#     model.add(Dense(200))
+#     model.add(Dense(2,activation='softmax'))
+#     model.compile(loss="binary_crossentropy", optimizer="adam",metrics=['accuracy'])
+#     print model.summary()
+#     return model
+
 # fix random seed for reproducibility
 
 epochs = 5
@@ -96,7 +97,7 @@ batches = 64
 #partition dataset
 (x_train, x_test,y_train,y_test) = train_test_split(instances,labels, test_size=0.2, random_state=seed)
 # non_linear_model = learning_model()
-non_linear_model = DummyClassifier()
+non_linear_model = learning_model()
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=0,patience=5)
 x_train = np.array(x_train)
 x_test = np.array(x_test)
