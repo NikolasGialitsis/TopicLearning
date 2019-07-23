@@ -1,5 +1,5 @@
 import json
-JsonFile = open('/home/superuser/SequenceEncoding/Representations/multiling_english.json')
+JsonFile = open('/home/superuser/SequenceEncoding/Representations/multiling_english_lblratio2mod_oversample.json')
 values = json.load(JsonFile)
 
 documents = {}

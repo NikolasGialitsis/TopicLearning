@@ -7,24 +7,6 @@ import java.util.*;
  */
 
 public class TFIDF_Representation {
-    private static Vector<Vector<Double>> normalize_vectors(Vector<Vector<Double>> vectors){
-
-        Vector<Vector<Double>> new_v = new Vector<>();
-        for(int i = 0 ; i < vectors.size(); i++){
-            double sum = 0.0;
-            Vector<Double> vector = vectors.get(i);
-            for(double val : vector){
-                sum = sum + val;
-            }
-            for(int j = 0 ; j < vector.size() ; j++){
-                if(vector.get(j) == 0 )continue;
-
-                vector.set(j,(vector.get(j)*1.0)/(sum));
-            }
-            new_v.add(vector);
-        }
-        return new_v;
-    }
     private static final String DELIMITER = " ";
     public static class TFIDFCalculator {
         /**
@@ -91,9 +73,10 @@ public class TFIDF_Representation {
         List<List<String>> documents = new ArrayList<>();
         List<List<Integer>> labels = new ArrayList<>();
         String line;
-
         BufferedWriter writer2 = new BufferedWriter(new FileWriter(directory_path+"/tfidf_labels.dat"));
 
+
+        //parse dataset and store in vector
         ArrayList<Vector<Vector<String>>> init_sentences = new ArrayList<>();
         while ((line = br.readLine()) != null){
             StringTokenizer defaultTokenizer = new StringTokenizer(line);
@@ -135,7 +118,7 @@ public class TFIDF_Representation {
 
 
         BufferedWriter writer = new BufferedWriter(new FileWriter(directory_path+"/tfidf_repr.dat"));
-
+        //Calculate for each document its words' tfidf representation
         TFIDFCalculator calculator = new TFIDFCalculator();
         ArrayList<HashMap<String,Double>> TFIDF_representations = new ArrayList<>();
         int document_id = 0;
@@ -154,6 +137,7 @@ public class TFIDF_Representation {
         }
 
 
+        //Represent each original sentence with the sequence of its tfidf representations
         ArrayList<Vector<Vector<Double>>> sentence_representations = new ArrayList<>();
 
         for (int doc_id = 0 ; doc_id < document_id ; doc_id++){
@@ -166,7 +150,7 @@ public class TFIDF_Representation {
                     System.out.println("looking for "+word+" in D"+doc_id);
                     double word_repr = TFIDF_representations.get(doc_id).get(word);
                     System.out.println("word repr " + word_repr);
-                    Vector<Double> dummy = new Vector<>();
+                    Vector<Double> dummy = new Vector<>(); //dummy replaces scalar value x with [x]
                     dummy.add(word_repr);
                     tfidf_sequence.add(dummy);
                 }
@@ -174,6 +158,7 @@ public class TFIDF_Representation {
             }
         }
 
+        //pad sentences with max length
         Vector<Double> pad_vector = new Vector<>();
         pad_vector.add(0.0);
         for(Vector<Vector<Double>> sentence : sentence_representations){

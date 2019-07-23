@@ -62,6 +62,9 @@ public class Probabilistic_Interface {
         File file = new File(directory_path+"/dataset.txt");
         BufferedReader br = new BufferedReader(new FileReader(file));
         int max_sentence_words = -1;
+
+
+        //parse dataset and store sentence representations
         while ((line = br.readLine()) != null){
             StringTokenizer defaultTokenizer = new StringTokenizer(line);
             defaultTokenizer.nextToken();
@@ -79,6 +82,7 @@ public class Probabilistic_Interface {
                 if(terms.length > max_sentence_words){
                     max_sentence_words = terms.length;
                 }
+                //calculation of term representations
                 for (String term : terms) {
                     term = term.toLowerCase();
                     if (TermTopicContribution.containsKey(term)) {
@@ -87,11 +91,11 @@ public class Probabilistic_Interface {
                 }
                 System.out.println("\t"+sentence);
                 writer2.write(fields[4]+"\n");
-                sentence = normalize_vectors(sentence);
+                //sentence = normalize_vectors(sentence);
                 sentence_representations.add(sentence);
             }
         }
-
+        // add padding to sentences
         Vector<Double> pad_vector = new Vector<>();
         for(int i = 0 ; i < topics_num ; i++){
             pad_vector.add(0.0);

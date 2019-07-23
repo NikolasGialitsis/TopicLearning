@@ -66,7 +66,7 @@ class Probabilistic_Representation {
 
         // Run the model for 50 iterations and stop (this is for testing only,
         //  for real applications, use 1000 to 2000 iterations)
-        model.setNumIterations(1500);
+        model.setNumIterations(1850);
         model.estimate();
 
         for( int i = 0 ; i < this.instances_num ; i++){

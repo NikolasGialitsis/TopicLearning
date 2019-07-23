@@ -1,0 +1,107 @@
+Instances num = 6990
+Labels num = 6990
+DecisionTreeClassifier
+DecisionTreeClassifier
+DecisionTreeClassifier
+DecisionTreeClassifier
+DecisionTreeClassifier
+DecisionTreeClassifier
+DecisionTreeClassifier
+DecisionTreeClassifier
+DecisionTreeClassifier
+DecisionTreeClassifier
+DecisionTreeClassifier
+==================================
+f1 score macro 0.7982983318819603
+f1 score micro 0.838581126654826
+==================================
+RandomForestClassifier
+RandomForestClassifier
+RandomForestClassifier
+RandomForestClassifier
+RandomForestClassifier
+RandomForestClassifier
+RandomForestClassifier
+RandomForestClassifier
+RandomForestClassifier
+RandomForestClassifier
+RandomForestClassifier
+==================================
+f1 score macro 0.8267504447213966
+f1 score micro 0.8660718967567842
+==================================
+AdaBoostClassifier
+AdaBoostClassifier
+AdaBoostClassifier
+AdaBoostClassifier
+AdaBoostClassifier
+AdaBoostClassifier
+AdaBoostClassifier
+AdaBoostClassifier
+AdaBoostClassifier
+AdaBoostClassifier
+AdaBoostClassifier
+==================================
+f1 score macro 0.9269507601183102
+f1 score micro 0.9354609426834545
+==================================
+GradientBoostingClassifier
+GradientBoostingClassifier
+GradientBoostingClassifier
+GradientBoostingClassifier
+GradientBoostingClassifier
+GradientBoostingClassifier
+GradientBoostingClassifier
+GradientBoostingClassifier
+GradientBoostingClassifier
+GradientBoostingClassifier
+GradientBoostingClassifier
+==================================
+f1 score macro 0.9297313510365373
+f1 score micro 0.9391858675366308
+==================================
+GaussianNB
+GaussianNB
+GaussianNB
+GaussianNB
+GaussianNB
+GaussianNB
+GaussianNB
+GaussianNB
+GaussianNB
+GaussianNB
+GaussianNB
+==================================
+f1 score macro 0.6340669157788454
+f1 score micro 0.7157176733969409
+==================================
+LinearDiscriminantAnalysis
+LinearDiscriminantAnalysis
+LinearDiscriminantAnalysis
+LinearDiscriminantAnalysis
+LinearDiscriminantAnalysis
+LinearDiscriminantAnalysis
+LinearDiscriminantAnalysis
+LinearDiscriminantAnalysis
+LinearDiscriminantAnalysis
+LinearDiscriminantAnalysis
+LinearDiscriminantAnalysis
+==================================
+f1 score macro 0.7506850495510441
+f1 score micro 0.795955669669026
+==================================
+DummyClassifier
+DummyClassifier
+DummyClassifier
+DummyClassifier
+DummyClassifier
+DummyClassifier
+DummyClassifier
+DummyClassifier
+DummyClassifier
+DummyClassifier
+DummyClassifier
+==================================
+f1 score macro 0.39969089832896937
+f1 score micro 0.6658085692852839
+==================================
