@@ -60,12 +60,12 @@ classifiers = [
     GradientBoostingClassifier(),
     GaussianNB(),
     LinearDiscriminantAnalysis(),
-    DummyClassifier(strategy="most_frequent",random_state=111)
+    DummyClassifier(strategy="stratified",random_state=111)
     #QuadraticDiscriminantAnalysis()
     ]
 
 
-text_file = open("/home/superuser/SequenceEncoding/Representations/tfidf_repr.dat", "r")
+text_file = open("/home/superuser/SequenceEncoding/Representations/tfidf_repr_train.dat", "r")
 instances_concat = text_file.readlines()
 time_steps = 10
 num_steps = -1
@@ -76,7 +76,7 @@ for instance in instances_concat:
     instances.append(vec)
 
 text_file.close()
-labels_file = open("/home/superuser/SequenceEncoding/Representations/tfidf_labels.dat", "r")
+labels_file = open("/home/superuser/SequenceEncoding/Representations/tfidf_labels_train.dat", "r")
 labels  = labels_file.readlines()
 labels_file.close()
 
@@ -116,12 +116,13 @@ seed = 111
 batches = 64
 
 #partition dataset
-
-
-
+print(sys.argv)
 validate = False
+if  len(sys.argv) > 1 and sys.argv[1] == "-validate":
+    validate = True
 
 if validate == True:
+    print("=== Validation mode ===")
     n_splits = 10
     skf = StratifiedKFold(n_splits=n_splits)
 
@@ -201,16 +202,18 @@ if validate == True:
         print('f1 score micro ' + str(micro_sum/n_splits))
         print('==================================')
 else:
+    print("=== Training mode ===")
+    for cnf in classifiers:
 
-    instances = np.array(instances)
-    labels = np.array(labels)
-    non_linear_model = GradientBoostingClassifier()
+        instances = np.array(instances)
+        labels = np.array(labels)
+        non_linear_model = cnf
 
-    flattenedInstances = np.array([np.ndarray.flatten(xVec) for xVec in instances])
-    x_train = np.array(flattenedInstances)
-    y_train = y_test = np.array(labels)
-    name = non_linear_model.__class__.__name__
-    print('-- Training with ' +name)
-    non_linear_model.fit(x_train, y_train)
-    # save model to file
-    pickle.dump(non_linear_model, open("non_linear_model.pickle", "wb"))
+        flattenedInstances = np.array([np.ndarray.flatten(xVec) for xVec in instances])
+        x_train = np.array(flattenedInstances)
+        y_train = y_test = np.array(labels)
+        name = non_linear_model.__class__.__name__
+        print('-- Training with ' +name)
+        non_linear_model.fit(x_train, y_train)
+        # save model to file
+        pickle.dump(non_linear_model, open("TrainedModels/"+name + ".pickle", "wb"))

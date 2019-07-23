@@ -1,13 +1,19 @@
 
 import java.io.*;
 import java.util.*;
-
+import java.util.HashMap;
 /**
  * @author nikolas
  */
 
-public class TFIDF_Representation {
+public class TFIDF_Representation    {
+
     private static final String DELIMITER = " ";
+    private static HashMap<String,Double> IDF_values = new HashMap<>();
+
+    public TFIDF_Representation() {
+    }
+
     public static class TFIDFCalculator {
         /**
          * @param doc  list of strings
@@ -38,7 +44,9 @@ public class TFIDF_Representation {
                     }
                 }
             }
-            return Math.log(docs.size() / n);
+            double value = Math.log(docs.size() / n);
+            IDF_values.put(term,value);
+            return value;
         }
 
         /**
@@ -47,33 +55,52 @@ public class TFIDF_Representation {
          * @param term term
          * @return the TF-IDF of term
          */
-        double tfIdf(List<String> doc, List<List<String>> docs, String term) {
+        double tfIdf(List<String> doc, List<List<String>> docs, String term,String mode) {
             //System.out.println("\tTF ("+ term+") = " + tf(doc,term));
             //System.out.println("\tIDF ("+ term+") = " + idf(docs,term)+"\n\n");
-            return tf(doc, term) * idf(docs, term);
+            if(IDF_values.containsKey(term)){
+              return tf(doc, term) * IDF_values.get(term);
+            }
+            else {
+                if(mode.equals("train")) {
+                    return tf(doc, term) * idf(docs, term);
+                }
+                else if(mode.equals("test")){
+                    return 0.0;
+                }
+                else {
+                    throw new UnsupportedOperationException();
+                }
+            }
 
         }
 
     }
     public static void main(String[] args) throws Exception {
 
+        boolean load_idfs = false;
+        String file_suffix = "train";
         String directory_path = "/root/IdeaProjects/TFIDF_Model";
         for(int i = 0 ; i < args.length - 1 ; i++){
             switch (args[i]) {
                 case "-path":  // project path that contains a Fasta_Files/ directory containing all fasta files
                     directory_path = args[i + 1];
                     break;
+                case "-test":
+                    load_idfs = true;
+                    file_suffix = "test";
             }
         }
 
 
-        File file = new File(directory_path+"/dataset.txt");
+        File file = new File(directory_path+"/"+file_suffix+"_dataset.txt");
         BufferedReader br = new BufferedReader(new FileReader(file));
-        int max_sentence_words = -1;
+        int max_sentence_words = 123; //to adjust
         List<List<String>> documents = new ArrayList<>();
         List<List<Integer>> labels = new ArrayList<>();
         String line;
-        BufferedWriter writer2 = new BufferedWriter(new FileWriter(directory_path+"/tfidf_labels.dat"));
+        BufferedWriter writer2 = new BufferedWriter(new FileWriter(directory_path
+                + "/tfidf_labels_"+file_suffix+".dat"));
 
 
         //parse dataset and store in vector
@@ -83,7 +110,7 @@ public class TFIDF_Representation {
             defaultTokenizer.nextToken();
             int document_id = Integer.parseInt(defaultTokenizer.nextToken());
             int sentences_num = Integer.parseInt(defaultTokenizer.nextToken());
-            System.out.println("Document "+document_id+ ' '+ sentences_num);
+            System.out.println(file_suffix+"/Document "+document_id+ ' '+ sentences_num);
             List<String> document = new ArrayList<>();
 
             Vector<Vector<String>> sentences = new Vector<>();
@@ -98,7 +125,7 @@ public class TFIDF_Representation {
                 Vector<String> sentence = new Vector<>();
                 int words_num = 0;
                 for(String term : terms) {
-                    if(term == "" || term == " ")continue;
+                    if(term.equals("") || term.equals(" "))continue;
                     document.add(term + " ");
                     sentence.add(term);
                     words_num = words_num + 1;
@@ -115,9 +142,17 @@ public class TFIDF_Representation {
             documents.add(document);
         }
 
+        //load already saved idfs from map
+        if(load_idfs){
+            Properties properties = new Properties();
+            properties.load(new FileInputStream("IDF_Map.properties"));
+            for (String key : properties.stringPropertyNames()) {
+                IDF_values.put(key,  Double.parseDouble(String.valueOf(properties.get(key))));
+            }
+        }
 
-
-        BufferedWriter writer = new BufferedWriter(new FileWriter(directory_path+"/tfidf_repr.dat"));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(directory_path+
+                "/tfidf_repr_"+file_suffix+".dat"));
         //Calculate for each document its words' tfidf representation
         TFIDFCalculator calculator = new TFIDFCalculator();
         ArrayList<HashMap<String,Double>> TFIDF_representations = new ArrayList<>();
@@ -126,7 +161,7 @@ public class TFIDF_Representation {
             HashMap<String,Double> docmap = new HashMap<>();
             for(String word : doc){
                 word = word.toLowerCase();
-                double word_tfidf = calculator.tfIdf(doc, documents, word);
+                double word_tfidf = calculator.tfIdf(doc, documents, word,file_suffix);
                 word = word.replaceAll("\\s+$", "");
                 if(word_tfidf == 0.0)System.out.println("\t 0 > "+word);
                 System.out.println("Insert D"+document_id+ " /"+word+":"+word_tfidf) ;
@@ -146,7 +181,7 @@ public class TFIDF_Representation {
                 Vector<Vector<Double>> tfidf_sequence = new Vector<>();
                 for (String word : sentence) {
                     word = word.toLowerCase();
-                    if(word == "" || word == " ")continue;
+                    if(word.equals("") || word.equals(" "))continue;
                     System.out.println("looking for "+word+" in D"+doc_id);
                     double word_repr = TFIDF_representations.get(doc_id).get(word);
                     System.out.println("word repr " + word_repr);
@@ -166,11 +201,20 @@ public class TFIDF_Representation {
             while(sentence_words < max_sentence_words){
                 sentence.add(pad_vector);
                 sentence_words++;
-            };
+            }
             writer.write(sentence+"\n");
         }
         writer.close();
         writer2.close();
+
+        //save IDF map
+        if(!load_idfs) {
+            Properties properties = new Properties();
+            for (HashMap.Entry<String, Double> entry : IDF_values.entrySet()) {
+                properties.put(entry.getKey(), entry.getValue().toString());
+            }
+            properties.store(new FileOutputStream("IDF_Map.properties"), null);
+        }
     }
 
 }
