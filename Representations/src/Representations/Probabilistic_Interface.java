@@ -1,3 +1,6 @@
+import cc.mallet.pipe.SerialPipes;
+import cc.mallet.topics.ParallelTopicModel;
+
 import java.util.*;
 import java.io.*;
 /**
@@ -31,6 +34,7 @@ public class Probabilistic_Interface {
         String directory_path = "/root/IdeaProjects/ProbabilisticModel";
         String stop_words_path = "";
         int topics_num = 10;
+        String mode = "train";
         for(int i = 0 ; i < args.length - 1 ; i++){
             switch (args[i]) {
                 case "-topics": //number of topics for topic model
@@ -42,24 +46,29 @@ public class Probabilistic_Interface {
                 case "-stop":  // path to a file containing the list of stop words used by the topic model
                     stop_words_path = args[i+1];
                     break;
+                case "-test":
+                    mode ="test";
+                    break;
             }
         }
 
 
         System.out.println("Topics num : "+topics_num);
-        String mallet_instances_path = directory_path+"/sentences.txt";
-        Probabilistic_Representation model; // Run the topic model representation
-        model = new Probabilistic_Representation(mallet_instances_path,topics_num,stop_words_path);
-        HashMap<String,Vector<Double>> TermTopicContribution = model.getTermTopicContribution();
+        String mallet_instances_path = directory_path+"/"+mode+"_sentences.txt";
+        Probabilistic_Representation model  = null;
+        if(mode.equals("test")) {
+            model = new Probabilistic_Representation(mallet_instances_path, topics_num, stop_words_path,true);
+        }
+        else{
+            model =  new Probabilistic_Representation(mallet_instances_path, topics_num, stop_words_path,false);
+        }
 
-
+        HashMap<String, Vector<Double>> TermTopicContribution = model.getTermTopicContribution();
         String line;
-
         ArrayList<Vector<Vector<Double>>> sentence_representations = new ArrayList<>();
-
-        BufferedWriter writer = new BufferedWriter(new FileWriter(directory_path+"/prob_repr.dat"));
-        BufferedWriter writer2 = new BufferedWriter(new FileWriter(directory_path+"/prob_labels.dat"));
-        File file = new File(directory_path+"/dataset.txt");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(directory_path+"/prob_repr_"+mode+".dat"));
+        BufferedWriter writer2 = new BufferedWriter(new FileWriter(directory_path+"/prob_labels_"+mode+".dat"));
+        File file = new File(directory_path+"/"+mode+"_dataset.txt");
         BufferedReader br = new BufferedReader(new FileReader(file));
         int max_sentence_words = -1;
 
@@ -91,7 +100,7 @@ public class Probabilistic_Interface {
                 }
                 System.out.println("\t"+sentence);
                 writer2.write(fields[4]+"\n");
-                //sentence = normalize_vectors(sentence);
+                sentence = normalize_vectors(sentence);
                 sentence_representations.add(sentence);
             }
         }

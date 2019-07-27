@@ -95,7 +95,7 @@ public class TFIDF_Representation    {
 
         File file = new File(directory_path+"/"+file_suffix+"_dataset.txt");
         BufferedReader br = new BufferedReader(new FileReader(file));
-        int max_sentence_words = 123; //to adjust
+        int max_sentence_words = -1;
         List<List<String>> documents = new ArrayList<>();
         List<List<Integer>> labels = new ArrayList<>();
         String line;
