@@ -5,7 +5,7 @@ import sys
 def main():
     JsonFile = open('/home/superuser/SequenceEncoding/Representations/multiling_english_lblratio2mod_oversample.json')
     values = json.load(JsonFile)
-
+    stopwords = ['.'',',':','[',']','{','}','\n','\t','\r','!','?',';']
     documents = {}
     sentences = []
 
@@ -18,19 +18,8 @@ def main():
     print('\t'+str(sentences_num)+' sentences')
     for sentence in values['data'][mode]:
         text = sentence['text']
-        text = text.replace('\n', ' ') #remove line breaks inside sentences.
-        '''
-        text = text.replace('.',' ')
-        text = text.replace('(',' ')
-        text = text.replace(')',' ')
-        text = text.replace('\t',' ')
-        text = text.replace('{',' ')
-        text = text.replace('}',' ')
-        text = text.replace(',',' ')
-        text = text.replace(':',' ')
-        text = text.replace('?',' ')
-        text = text.replace('!',' ')
-        '''
+        for stop in stopwords:
+            text = text.replace(stop,' ')
         for ignored in xrange (0,10):
             text = text.replace('  ',' ')
 

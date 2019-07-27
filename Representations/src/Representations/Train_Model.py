@@ -48,83 +48,87 @@ from sklearn.decomposition import PCA
 from sklearn.tree import DecisionTreeClassifier
 
 import tensorflow as tf
-
-
-classifiers = [
-    #KNeighborsClassifier(3),
-    #SVC(kernel="rbf", C=0.025, probability=True),
-    #NuSVC(probability=True),
-    DecisionTreeClassifier(),
-    RandomForestClassifier(),
-    AdaBoostClassifier(),
-    GradientBoostingClassifier(),
-    GaussianNB(),
-    LinearDiscriminantAnalysis(),
-    DummyClassifier(strategy="stratified",random_state=111)
-    #QuadraticDiscriminantAnalysis()
-    ]
-
+num_steps = 8
+input_dim = 0
+seed = 111
+def LSTM_NN(): #Neural Network Architecture#
+    model = Sequential()
+    input_shape=(num_steps,input_dim)
+    print("lstm input shape:", input_shape)
+    model.add(LSTM(200,return_sequences=False))  # returns a sequence of vectors of dimension 32
+    model.add(Dense(200))
+    model.add(Dense(1,input_dim=32, activation='softmax'))
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    return model
 def main():
+
+
     repr = "tfidf"
     for arg in sys.argv:
         if arg == "-prob":
             repr = "prob"
     print('Training model on '+repr+' representation...')
     text_file = open("/home/superuser/SequenceEncoding/Representations/"+repr+"_repr_train.dat", "r")
+    print('...opened file')
     instances_concat = text_file.readlines()
-    time_steps = 10
-    num_steps = -1
+    text_file.close()
+
     instances = []
+    print('...append instances' )
+    count = 0
+
     for instance in instances_concat:
+        global num_steps
+        global input_dim
+        print('\tInstance:'+str(count))
+        count = count + 1
         vec = literal_eval(instance)
         num_steps = len(vec)
+        input_dim = len(vec[0])
         instances.append(vec)
+    classifiers = [
+        #KNeighborsClassifier(3),
+        #SVC(kernel="rbf", C=0.025, probability=True),
+        #NuSVC(probability=True),
+        LSTM_NN(),
+        DecisionTreeClassifier(random_state=seed),
+        RandomForestClassifier(random_state=seed),
+        AdaBoostClassifier(random_state=seed),
+        GradientBoostingClassifier(random_state=seed),
+        GaussianNB(),
+        LinearDiscriminantAnalysis(),
 
+        DummyClassifier(strategy="stratified",random_state=seed)
+        #QuadraticDiscriminantAnalysis()
+
+    ]
     text_file.close()
+    print('...open label')
     labels_file = open("/home/superuser/SequenceEncoding/Representations/"+repr+"_labels_train.dat", "r")
     labels  = labels_file.readlines()
     labels_file.close()
 
-
+    print ('...close label')
     # integer encode
     label_encoder = LabelEncoder()
     integer_encoded = label_encoder.fit_transform(labels)
     labels = integer_encoded
     print('Instances num = '+ str(len(instances)))
     print('Labels num = ' + str(len(labels)))
-    def learning_model(): #Neural Network Architecture#
-        global input_dim
-        global num_steps
-        global input_shape
 
-        model = Sequential()
-        print('dim '+str(input_dim))
-        print('steps '+str(num_steps))
-        input_shape=(time_steps,input_dim)
-        print("lstm input shape:", input_shape)
-        model.add(LSTM(10, input_shape=input_shape, dropout=0.2, recurrent_dropout=0.2))
-
-        #     model.add(Dense(100))
-        #     model.add(Dropout(0.2))
-        #     model.add(Dense(100))
-        model.add(Dense(1, activation='softmax'))
-        model.compile(loss="binary_crossentropy", optimizer="adam",metrics=['accuracy'])
-        model.summary()
-        return model
-
-
-
-    # fix random seed for reproducibility
-
-    epochs = 100
-    seed = 111
-    batches = 64
 
     #partition dataset
     print(sys.argv)
     validate = False
-    if  len(sys.argv) > 1 and sys.argv[1] == "-validate":
-        validate = True
+    only_nn = False
+    for arg in sys.argv:
+        if  arg == "-validate":
+            validate = True
+            continue
+        if arg == "-only_nn":
+            only_nn = True
+            continue
+
 
     if validate == True:
         print("=== Validation mode ===")
@@ -139,57 +143,24 @@ def main():
             #print("+++ Starting fold...")
             micro_sum = 0.0
             macro_sum = 0.0
-
+            name = non_linear_model.__class__.__name__
+            if only_nn and name is not 'Sequential':
+                continue
             for train_index, test_index in skf.split(instances, labels):
-                #print("TRAIN:", train_index, "TEST:", test_index)
-                #print("+ Flattening instances...")
-                flattenedInstances = np.array([np.ndarray.flatten(xVec) for xVec in instances])
-                #print("+ Flattening instances... Done.")
-                x_train, x_test = np.array(flattenedInstances[train_index]), np.array(flattenedInstances[test_index])
-                #x_train, x_test = np.array(instances[train_index]), np.array(instances[test_index])
-                #x_train, x_test = x_train[:,:time_steps,:],  x_test[:,:time_steps,:]
+                x_train , x_test = [] , []
+                if(name == 'Sequential'):
+
+                    x_train, x_test = np.array(instances[train_index]), np.array(instances[test_index])
+                    x_train, x_test = x_train[:, :num_steps, :],  x_test[:,:num_steps,:]
+                else:
+                    flattenedInstances = np.array([np.ndarray.flatten(xVec) for xVec in instances])
+                    x_train, x_test = np.array(flattenedInstances[train_index]), np.array(flattenedInstances[test_index])
                 y_train, y_test = np.array(labels[train_index]), np.array(labels[test_index])
-                #print('---- XTRAIN 1st instance ----\n'+str(x_train[0]))
-                #print('---- YTRAIN 1st instance  ----\n'+str(y_train[0]))
-
-
-                input_dim = x_train.shape[-1]
-                #print("Shape:" + str(x_train.shape))
-
-                #print("+ Fitting model...")
 
                 non_linear_model = clf
                 name = non_linear_model.__class__.__name__
                 print(name)
                 non_linear_model.fit(x_train, y_train)
-
-
-                #================================
-                # Decision Tree Classifier : almost equals to dummy [stratified]
-                #================================
-                #non_linear_model = tree.DecisionTreeClassifier(criterion = "gini",\
-                #                                              random_state = seed,max_depth=3, min_samples_leaf=5)
-                #non_linear_model.fit(x_train, y_train)
-
-
-                #================================
-                # Gaussian Classifier : below baseline [with flattened instances]
-                #================================
-                #non_linear_model = GaussianNB()
-                #non_linear_model.fit(x_train, y_train)
-
-                #================================
-                # Keras NN classifier : equals baseline
-                #================================
-                #non_linear_model = KerasClassifier(build_fn= learning_model, epochs=epochs)
-                #es = EarlyStopping(monitor='loss', mode='min', verbose=0,patience=5)
-                #non_linear_model.fit(x=x_train,y=y_train,validation_data=(x_test,y_test),callbacks=[es])
-
-                #================================
-                # Dummy classifier
-                #================================
-                #non_linear_model = DummyClassifier(strategy="most_frequent",random_state=seed)
-                #non_linear_model.fit(X=x_train,y=y_train)
 
                 #print("+ Fitting model... Done.")
                 x_test = np.array(x_test)
@@ -200,7 +171,7 @@ def main():
 
                 micro_sum = micro_sum + f1_score(y_test,y_pred,average="micro")
                 macro_sum = macro_sum + f1_score(y_test,y_pred,average="macro")
-            name = non_linear_model.__class__.__name__
+
             print(str(name))
             print('==================================')
             print('f1 score macro ' + str(macro_sum/n_splits))
@@ -213,15 +184,23 @@ def main():
             instances = np.array(instances)
             labels = np.array(labels)
             non_linear_model = cnf
-
-            flattenedInstances = np.array([np.ndarray.flatten(xVec) for xVec in instances])
-            x_train = np.array(flattenedInstances)
-            y_train = y_test = np.array(labels)
+            print(cnf)
             name = non_linear_model.__class__.__name__
             print('-- Training with ' +name)
-            non_linear_model.fit(x_train, y_train)
+            if only_nn and name is not 'Sequential':
+                continue
+            y_train = np.array(labels)
+            if(name == 'Sequential'):
+                x_train = np.array(instances)
+                x_train = x_train[:, :num_steps, :]
+                non_linear_model.fit(x_train, y_train,batch_size=32,epochs=10,shuffle=False)
+            else:
+                flattenedInstances = np.array([np.ndarray.flatten(xVec) for xVec in instances])
+                x_train = np.array(flattenedInstances)
+                non_linear_model.fit(x_train, y_train)
             # save model to file
             pickle.dump(non_linear_model, open("TrainedModels/"+name + ".pickle", "wb"))
-
+            break
 if __name__ == '__main__':
+    print 'main init'
     main()

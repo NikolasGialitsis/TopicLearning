@@ -1,28 +1,66 @@
-import pickle
-from ast import literal_eval
-from sklearn.preprocessing import LabelEncoder
+#basic libraries
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
+import sys
 from sklearn.metrics import f1_score
+from keras.wrappers.scikit_learn import KerasClassifier
+from keras.layers import Dropout, LSTM, Dense, TimeDistributed,Activation,Input
+from ast import literal_eval
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import StratifiedKFold
+from sklearn import tree
+import numpy
+import pandas
+import scipy
+import joblib
+import keras
+from sklearn.linear_model import LinearRegression
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn.naive_bayes import GaussianNB
+#Deep learning modules
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Flatten
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
+from keras import models
+import pickle
+from keras.callbacks import EarlyStopping
+from keras.wrappers.scikit_learn import KerasRegressor
+from sklearn.metrics import accuracy_score, log_loss
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC, LinearSVC, NuSVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.model_selection import train_test_split
 from sklearn.dummy import  DummyClassifier
-import sys
+from sklearn.model_selection import KFold
+from sklearn.metrics import r2_score
+from sklearn.decomposition import PCA
+from sklearn.tree import DecisionTreeClassifier
+
+
 classifiers = [
     #KNeighborsClassifier(3),
     #SVC(kernel="rbf", C=0.025, probability=True),
     #NuSVC(probability=True),
+    # QuadraticDiscriminantAnalysis()
+    Sequential(),
     DecisionTreeClassifier(),
     RandomForestClassifier(),
     AdaBoostClassifier(),
     GradientBoostingClassifier(),
     GaussianNB(),
     LinearDiscriminantAnalysis(),
-    DummyClassifier(strategy="stratified",random_state=111)
-    #QuadraticDiscriminantAnalysis()
+    DummyClassifier()
 ]
 
 
@@ -59,11 +97,13 @@ def main():
 
 
     labels = np.array(labels)
-    name = classifiers[0].__class__.__name__
+    name = classifiers[1].__class__.__name__
 
     loaded_model = pickle.load(open("TrainedModels/"+name+".pickle", "rb"))
-    model_n_features = loaded_model.n_features_/(topic_num)
-    model_n_features = (int)(model_n_features)
+    model_n_features = 0
+    if name is not Sequential:
+        model_n_features = loaded_model.n_features_/(topic_num)
+        model_n_features = (int)(model_n_features)
     print('model n_features = '+str(model_n_features))
     print('input n_features = '+str(input_n_features))
     print('values per term = '+str(topic_num))
@@ -80,18 +120,24 @@ def main():
     flattenedInstances = np.array([np.ndarray.flatten(xVec) for xVec in instances])
 
     for clf in classifiers:
-        x_test = np.array(flattenedInstances)
+        x_test = instances
+        name = clf.__class__.__name__
+        if(name == 'Sequential'):
+            x_test = x_test[:, :model_n_features, :]
+        else:
+            x_test = np.array(flattenedInstances)
         #print(x_test)
 
         y_test = np.array(labels)
         print('Loading saved trained model ...')
         # load model from file
 
-        name = clf.__class__.__name__
+
         print(name)
         loaded_model = pickle.load(open("TrainedModels/"+name+".pickle", "rb"))
         # make predictions for test data
         print('Make predictions...')
+
         y_pred = loaded_model.predict(x_test)
         print('...Done\n')
         micro_sum = f1_score(y_test,y_pred,average="micro")
@@ -101,6 +147,7 @@ def main():
         print('f1 score macro ' + str(macro_sum))
         print('f1 score micro ' + str(micro_sum))
         print('==================================')
+        break
 
 if __name__ == '__main__':
     main()
