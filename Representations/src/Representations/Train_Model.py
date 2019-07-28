@@ -90,7 +90,7 @@ def main():
         #KNeighborsClassifier(3),
         #SVC(kernel="rbf", C=0.025, probability=True),
         #NuSVC(probability=True),
-        LSTM_NN(),
+        #LSTM_NN(),
         DecisionTreeClassifier(random_state=seed),
         RandomForestClassifier(random_state=seed),
         AdaBoostClassifier(random_state=seed),
@@ -200,7 +200,6 @@ def main():
                 non_linear_model.fit(x_train, y_train)
             # save model to file
             pickle.dump(non_linear_model, open("TrainedModels/"+name + ".pickle", "wb"))
-            break
 if __name__ == '__main__':
     print 'main init'
     main()

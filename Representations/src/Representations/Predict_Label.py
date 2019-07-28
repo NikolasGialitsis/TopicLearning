@@ -3,12 +3,10 @@ import numpy as np
 import sys
 from sklearn.metrics import f1_score
 from keras.wrappers.scikit_learn import KerasClassifier
-from keras.layers import Dropout, LSTM, Dense, TimeDistributed,Activation,Input
 from ast import literal_eval
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import StratifiedKFold
 from sklearn import tree
-import numpy
 import pandas
 import scipy
 import joblib
@@ -23,11 +21,9 @@ from keras.layers import Flatten
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
-from keras import models
 import pickle
 from keras.callbacks import EarlyStopping
 from keras.wrappers.scikit_learn import KerasRegressor
-from sklearn.metrics import accuracy_score, log_loss
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC, LinearSVC, NuSVC
 from sklearn.tree import DecisionTreeClassifier
@@ -53,7 +49,7 @@ classifiers = [
     #SVC(kernel="rbf", C=0.025, probability=True),
     #NuSVC(probability=True),
     # QuadraticDiscriminantAnalysis()
-    Sequential(),
+    #Sequential(),
     DecisionTreeClassifier(),
     RandomForestClassifier(),
     AdaBoostClassifier(),
@@ -113,9 +109,7 @@ def main():
             sentence = instances[index]
             for x in xrange(input_n_features,model_n_features):
                 word_vec = np.zeros(topic_num)
-                #print 'word_vec : ' +str(word_vec.shape)
                 sentence.append(word_vec)
-            #print('after :'+str(len(sentence)))
     instances = np.array(instances)
     flattenedInstances = np.array([np.ndarray.flatten(xVec) for xVec in instances])
 
@@ -126,19 +120,19 @@ def main():
             x_test = x_test[:, :model_n_features, :]
         else:
             x_test = np.array(flattenedInstances)
-        #print(x_test)
 
         y_test = np.array(labels)
         print('Loading saved trained model ...')
         # load model from file
 
-
         print(name)
         loaded_model = pickle.load(open("TrainedModels/"+name+".pickle", "rb"))
         # make predictions for test data
         print('Make predictions...')
-
         y_pred = loaded_model.predict(x_test)
+        print('shape of predicted labels :'+str( y_pred.shape))
+        print y_pred
+        pickle.dump(np.ndarray(shape=(y_pred.shape),dtype=int,buffer=y_pred), open("results/"+name + ".pickle", "wb"))
         print('...Done\n')
         micro_sum = f1_score(y_test,y_pred,average="micro")
         macro_sum = f1_score(y_test,y_pred,average="macro")
@@ -147,7 +141,6 @@ def main():
         print('f1 score macro ' + str(macro_sum))
         print('f1 score micro ' + str(micro_sum))
         print('==================================')
-        break
 
 if __name__ == '__main__':
     main()
