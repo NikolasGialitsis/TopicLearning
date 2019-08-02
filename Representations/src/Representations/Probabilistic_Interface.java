@@ -28,6 +28,43 @@ public class Probabilistic_Interface {
         }
         return new_v;
     }
+
+    private static Vector<Vector<Double>>  average_vectors(Vector<Vector<Double>> vectors){
+
+        for(int i = 0 ; i < vectors.size(); i++) {
+            int N = vectors.size();
+            double sum = 0.0;
+            for (double val : vectors.elementAt(i)) {
+                sum = sum + val;
+            }
+            Vector<Double> new_v = new Vector<>();
+            new_v.add(sum / N);
+            vectors.set(i, new_v);
+        }
+        System.out.println(vectors);
+
+        return vectors;
+    }
+
+
+    private static Vector<Vector<Double>>  maximize_vectors(Vector<Vector<Double>> vectors){
+
+        for(int i = 0 ; i < vectors.size(); i++) {
+            double max_val = -1.0;
+            for (double val : vectors.elementAt(i)) {
+               if(val > max_val){
+                   max_val = val;
+               }
+            }
+            Vector<Double> new_v = new Vector<>();
+            new_v.add(max_val);
+            vectors.set(i, new_v);
+        }
+        System.out.println(vectors);
+
+        return vectors;
+    }
+
     private static final String DELIMITER = " ";
     public static void main(String[] args) throws Exception {
 
@@ -72,7 +109,6 @@ public class Probabilistic_Interface {
         BufferedReader br = new BufferedReader(new FileReader(file));
         int max_sentence_words = -1;
 
-
         //parse dataset and store sentence representations
         while ((line = br.readLine()) != null){
             StringTokenizer defaultTokenizer = new StringTokenizer(line);
@@ -80,6 +116,7 @@ public class Probabilistic_Interface {
             int document_id = Integer.parseInt(defaultTokenizer.nextToken());
             int sentences_num = Integer.parseInt(defaultTokenizer.nextToken());
             System.out.println("Document "+document_id+ ' '+ sentences_num);
+
 
             for(int i = 0 ; i < sentences_num ; i++) {
                 line = br.readLine();
@@ -93,6 +130,7 @@ public class Probabilistic_Interface {
                 }
                 //calculation of term representations
                 for (String term : terms) {
+
                     term = term.toLowerCase();
                     if (TermTopicContribution.containsKey(term)) {
                         sentence.add(TermTopicContribution.get(term));
@@ -100,7 +138,11 @@ public class Probabilistic_Interface {
                 }
                 System.out.println("\t"+sentence);
                 writer2.write(fields[4]+"\n");
-                sentence = normalize_vectors(sentence);
+                //sentence = normalize_vectors(sentence);
+                //sentence = average_vectors(sentence);
+                sentence = maximize_vectors(sentence);
+                topics_num = 1;
+
                 sentence_representations.add(sentence);
             }
         }

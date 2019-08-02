@@ -193,13 +193,13 @@ def main():
             if(name == 'Sequential'):
                 x_train = np.array(instances)
                 x_train = x_train[:, :num_steps, :]
-                non_linear_model.fit(x_train, y_train,batch_size=32,epochs=10,shuffle=False)
+                non_linear_model.fit(x_train, y_train,batch_size=64,epochs=2,shuffle=False)
             else:
                 flattenedInstances = np.array([np.ndarray.flatten(xVec) for xVec in instances])
                 x_train = np.array(flattenedInstances)
                 non_linear_model.fit(x_train, y_train)
             # save model to file
-            pickle.dump(non_linear_model, open("TrainedModels/"+name + ".pickle", "wb"))
+            pickle.dump(non_linear_model, open(repr+"_TrainedModels/"+name + ".pickle", "wb"))
 if __name__ == '__main__':
     print 'main init'
     main()

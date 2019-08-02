@@ -49,7 +49,7 @@ classifiers = [
     #SVC(kernel="rbf", C=0.025, probability=True),
     #NuSVC(probability=True),
     # QuadraticDiscriminantAnalysis()
-    #Sequential(),
+    #?Sequential(),
     DecisionTreeClassifier(),
     RandomForestClassifier(),
     AdaBoostClassifier(),
@@ -95,7 +95,7 @@ def main():
     labels = np.array(labels)
     name = classifiers[1].__class__.__name__
 
-    loaded_model = pickle.load(open("TrainedModels/"+name+".pickle", "rb"))
+    loaded_model = pickle.load(open(repr+"_TrainedModels/"+name+".pickle", "rb"))
     model_n_features = 0
     if name is not Sequential:
         model_n_features = loaded_model.n_features_/(topic_num)
@@ -126,13 +126,13 @@ def main():
         # load model from file
 
         print(name)
-        loaded_model = pickle.load(open("TrainedModels/"+name+".pickle", "rb"))
+        loaded_model = pickle.load(open(repr+"_TrainedModels/"+name+".pickle", "rb"))
         # make predictions for test data
         print('Make predictions...')
         y_pred = loaded_model.predict(x_test)
         print('shape of predicted labels :'+str( y_pred.shape))
         print y_pred
-        pickle.dump(np.ndarray(shape=(y_pred.shape),dtype=int,buffer=y_pred), open("results/"+name + ".pickle", "wb"))
+        pickle.dump(np.ndarray(shape=(y_pred.shape),dtype=int,buffer=y_pred), open("results/"+repr+"_"+name + ".pickle", "wb"))
         print('...Done\n')
         micro_sum = f1_score(y_test,y_pred,average="micro")
         macro_sum = f1_score(y_test,y_pred,average="macro")

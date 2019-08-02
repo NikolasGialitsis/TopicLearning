@@ -63,39 +63,39 @@ class Probabilistic_Representation {
         }
         return model;
     }
+    HashMap<String,Vector<Double>> getWordCounts(ParallelTopicModel model) {
 
 
-    HashMap<String,Vector<Double>> getWordCounts(InstanceList instances ,ParallelTopicModel model) {
+        // The data alphabet maps word IDs to strings
+        Alphabet dataAlphabet =  model.getAlphabet();
+        // Get an array of sorted sets of word ID/count pairs
+        ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
 
-        for( int i = 0 ; i < this.instances_num ; i++){
-            // The data alphabet maps word IDs to strings
-            Alphabet dataAlphabet =  model.getAlphabet();
-            // Get an array of sorted sets of word ID/count pairs
-            ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
-            for (int topic = 0; topic < topics_num; topic++) {
-                double total_occurrences = 0;
-                HashMap<String,Double> TermFrequencies = new HashMap<>();
-                for (IDSorter idCountPair : topicSortedWords.get(topic)) {
-                    Object obj = dataAlphabet.lookupObject(idCountPair.getID());
-                    TermFrequencies.putIfAbsent(obj.toString(), 0.0);
-                    double occurrences = TermFrequencies.get(obj.toString()) + 1;
-                    TermFrequencies.put(obj.toString(), occurrences);
-                    total_occurrences = total_occurrences + occurrences;
+        System.out.println("--- Create hashmap for each topic ----");
+        for (int topic = 0; topic < topics_num; topic++) {
+            System.out.println("Topic + "+topic);
+            double rank = 0;
+            double prev_weight = -1;
+            HashMap<String, Double> TermFrequencies = new HashMap<>();
+            for (IDSorter idCountPair : topicSortedWords.get(topic)) {
+                Object obj = dataAlphabet.lookupObject(idCountPair.getID());
+                double weight = idCountPair.getWeight();
+                if(weight != prev_weight){
+                    prev_weight = weight;
+                    rank = rank + 1;
                 }
-                for(String s : TermFrequencies.keySet()){
-                    if(total_occurrences == 0.0)continue;
-                    double old_value = TermFrequencies.get(s);
-                    TermFrequencies.put(s,old_value/total_occurrences);
-                }
-                this.TermTopicContribution.add(TermFrequencies);
+                TermFrequencies.put(obj.toString(), weight);
             }
+            this.TermTopicContribution.add(TermFrequencies);
         }
-
+        System.out.println("--- Build representations for each token ---");
         HashMap<String,Vector<Double>> TermRepresentations = new HashMap<>();
         int topic_id = 0;
         for(HashMap<String,Double> TopicMap : this.TermTopicContribution){
+            System.out.println("Topic "+topic_id);
             for(String term : TopicMap.keySet()) {
                 double contribution_to_topic_percent = TopicMap.get(term);
+
                 if(!TermRepresentations.containsKey(term)){
                     Vector<Double> v = new Vector<>();
                     for(int i = 0 ; i < topics_num ; i++){
@@ -109,6 +109,7 @@ class Probabilistic_Representation {
             }
             topic_id = topic_id + 1;
         }
+
         return TermRepresentations;
     }
 
@@ -122,7 +123,7 @@ class Probabilistic_Representation {
         // Pipes: lowercase, tokenize, remove stopwords, map to features
         pipeList.add( new CharSequenceLowercase() );
         pipeList.add( new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")) );
-       // if(!stop_words_path.isEmpty())pipeList.add( new TokenSequenceRemoveStopwords(new File(stop_words_path), "UTF-8", false, false, false) );
+        if(!stop_words_path.isEmpty())pipeList.add( new TokenSequenceRemoveStopwords(new File(stop_words_path), "UTF-8", false, false, false) );
         pipeList.add( new TokenSequence2FeatureSequence() );
 
         InstanceList instances = new InstanceList (new SerialPipes(pipeList));
@@ -143,10 +144,10 @@ class Probabilistic_Representation {
             // Use two parallel samplers, which each look at one half the corpus and combine
             //  statistics after every iteration.
             model.setNumThreads(2);
-
+            model.setRandomSeed(111);
             // Run the model for 50 iterations and stop (this is for testing only,
             //  for real applications, use 1000 to 2000 iterations)
-            model.setNumIterations(1850);
+            model.setNumIterations(1000);
             model.estimate();
         }
         else{  // load old term topic contributions
@@ -155,7 +156,7 @@ class Probabilistic_Representation {
         if(!this.load_model){
             save_model(model,"topic_model.mallet");
         }
-        return getWordCounts(instances,model);
+        return getWordCounts(model);
     }
 
 }
