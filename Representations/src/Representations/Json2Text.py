@@ -5,7 +5,8 @@ import sys
 def main():
     JsonFile = open('/home/superuser/SequenceEncoding/Representations/multiling_english_lblratio2mod_oversample.json')
     values = json.load(JsonFile)
-    stopwords = ['.'',',':','[',']','{','}','\n','\t','\r','!','?',';']
+
+    stopwords = ['.',',',':','[',']','{','}','\n','\t','\r','!','?',';','`','\'']
     documents = {}
     sentences = []
 
@@ -37,6 +38,7 @@ def main():
         sentences = documents[document]
         f1.write(mode+'/Document '+ str(document) + ' ' + str(len(sentences)))
         f1.write('\n')
+        f2.write('Combined 1 ');
         for sentence in sentences:
             sentence_text = sentence[0]
             sentence_text = sentence_text.encode('utf8')
@@ -44,7 +46,6 @@ def main():
             f1.write("[%s]" % sentence_text)
             f1.write("[%s]\n" % sentence_label)
             f2.write("%s " % sentence_text)
-    f1.close()
     f2.close()
     JsonFile.close()
     print('...Done')

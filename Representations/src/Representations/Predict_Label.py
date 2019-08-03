@@ -29,6 +29,9 @@ from sklearn.svm import SVC, LinearSVC, NuSVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
 from sklearn.naive_bayes import GaussianNB
+from sklearn.linear_model import SGDClassifier
+import sklearn
+from sklearn.linear_model import LinearRegression
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.model_selection import cross_val_score
@@ -45,18 +48,20 @@ from sklearn.tree import DecisionTreeClassifier
 
 
 classifiers = [
-    #KNeighborsClassifier(3),
-    #SVC(kernel="rbf", C=0.025, probability=True),
-    #NuSVC(probability=True),
-    # QuadraticDiscriminantAnalysis()
-    #?Sequential(),
     DecisionTreeClassifier(),
-    RandomForestClassifier(),
-    AdaBoostClassifier(),
-    GradientBoostingClassifier(),
-    GaussianNB(),
-    LinearDiscriminantAnalysis(),
-    DummyClassifier()
+    KNeighborsClassifier()
+    #SVC(),
+    #NuSVC(),
+    #QuadraticDiscriminantAnalysis()
+    #Sequential(),
+    #RandomForestClassifier(),
+    #AdaBoostClassifier(),
+    #GradientBoostingClassifier()
+    #GaussianNB(),
+    #LinearDiscriminantAnalysis(),
+    #SGDClassifier(),
+    #DummyClassifier(),
+    #sklearn.linear_model.LogisticRegression()
 ]
 
 
@@ -77,9 +82,10 @@ def main():
         vec = literal_eval(instance)
         input_n_features = len(vec)
         topic_num = len(vec[0])
-        #print(input_n_features,topic_num)
+
         instances.append(vec)
         instances_num = instances_num+1
+    print(input_n_features,topic_num)
     print('\tinstances num = '+str(instances_num))
     text_file.close()
     labels_file = open("/home/superuser/SequenceEncoding/Representations/"+repr+"_labels_test.dat", "r")
@@ -93,30 +99,35 @@ def main():
 
 
     labels = np.array(labels)
-    name = classifiers[1].__class__.__name__
+    name = classifiers[0].__class__.__name__
 
     loaded_model = pickle.load(open(repr+"_TrainedModels/"+name+".pickle", "rb"))
     model_n_features = 0
-    if name is not Sequential:
-        model_n_features = loaded_model.n_features_/(topic_num)
-        model_n_features = (int)(model_n_features)
+    exclude_classifiers = ['Sequential','KNeighborsClassifier','SVC']
+    model_n_features = loaded_model.n_features_/(topic_num)
+    model_n_features = (int)(model_n_features)
+
     print('model n_features = '+str(model_n_features))
     print('input n_features = '+str(input_n_features))
     print('values per term = '+str(topic_num))
-    '''add padding so that the input and the model features are compatible'''
+    #add padding so that the input and the model features are compatible
     if input_n_features < model_n_features:
         for index in xrange(0,len(instances)):
             sentence = instances[index]
             for x in xrange(input_n_features,model_n_features):
                 word_vec = np.zeros(topic_num)
                 sentence.append(word_vec)
+    
+
     instances = np.array(instances)
+
     flattenedInstances = np.array([np.ndarray.flatten(xVec) for xVec in instances])
 
     for clf in classifiers:
         x_test = instances
+        print('input shape ' + str(x_test.shape) + '\n')
         name = clf.__class__.__name__
-        if(name == 'Sequential'):
+        if(name is 'Sequential'):
             x_test = x_test[:, :model_n_features, :]
         else:
             x_test = np.array(flattenedInstances)
@@ -126,13 +137,16 @@ def main():
         # load model from file
 
         print(name)
+        print('transformed shape '+ str(x_test.shape) + '\n')
         loaded_model = pickle.load(open(repr+"_TrainedModels/"+name+".pickle", "rb"))
         # make predictions for test data
         print('Make predictions...')
         y_pred = loaded_model.predict(x_test)
         print('shape of predicted labels :'+str( y_pred.shape))
         print y_pred
-        pickle.dump(np.ndarray(shape=(y_pred.shape),dtype=int,buffer=y_pred), open("results/"+repr+"_"+name + ".pickle", "wb"))
+        if name is not 'Sequential': #need to figure out why it doesnt work for NN
+            pickle.dump(np.ndarray(shape=(y_pred.shape),dtype=int,buffer=y_pred), open("results/"+repr+"_"+name + ".pickle", "wb"))
+
         print('...Done\n')
         micro_sum = f1_score(y_test,y_pred,average="micro")
         macro_sum = f1_score(y_test,y_pred,average="macro")

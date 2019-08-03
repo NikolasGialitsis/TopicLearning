@@ -65,7 +65,6 @@ class Probabilistic_Representation {
     }
     HashMap<String,Vector<Double>> getWordCounts(ParallelTopicModel model) {
 
-
         // The data alphabet maps word IDs to strings
         Alphabet dataAlphabet =  model.getAlphabet();
         // Get an array of sorted sets of word ID/count pairs
@@ -128,6 +127,7 @@ class Probabilistic_Representation {
 
         InstanceList instances = new InstanceList (new SerialPipes(pipeList));
 
+
         Reader fileReader = new InputStreamReader(new FileInputStream(new File(this.instances_path)), StandardCharsets.UTF_8);
         instances.addThruPipe(new CsvIterator (fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"),
                 3, 2, 1)); // data, label, name fields
@@ -135,6 +135,8 @@ class Probabilistic_Representation {
         // Create a model with 10 topics, alpha_t = 0.01, beta_w = 0.01
         //  Note that the first parameter is passed as the sum over topics, while
         //  the second is
+        instances_num = instances.size();
+
 
         ParallelTopicModel model = null;
         if(!this.load_model) {//estimate new term topic contributions
@@ -147,8 +149,14 @@ class Probabilistic_Representation {
             model.setRandomSeed(111);
             // Run the model for 50 iterations and stop (this is for testing only,
             //  for real applications, use 1000 to 2000 iterations)
-            model.setNumIterations(1000);
+            model.setNumIterations(1500);
             model.estimate();
+            HashMap<Integer,Integer> TopicsSentencesDistribution = new HashMap<>();
+            //BufferedWriter writer = new BufferedWriter(new FileWriter("dominant_topics.dat"));
+
+            PrintWriter out = new PrintWriter(new FileOutputStream("TopicModelSummary.inf"));
+            out.println("\n=== TopicWordWeights");
+            model.printTopicWordWeights(out);
         }
         else{  // load old term topic contributions
             model = load_topics("topic_model.mallet");

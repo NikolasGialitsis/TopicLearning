@@ -10,6 +10,28 @@ import java.io.*;
 
 public class Probabilistic_Interface {
 
+    private static Vector<Vector<Double>> reduce_dimensions(Vector<Vector<Double>> sentence){
+        HashMap<Integer,Double> topic_sum = new HashMap<>();
+        for(int i = 0 ; i < sentence.size(); i++){
+            Vector<Double> word_vector = sentence.get(i);
+            for(int j = 0 ; j < word_vector.size() ; j++){
+                if(!topic_sum.containsKey(j)){
+                    topic_sum.put(j,0.0);
+                }
+                double new_v = topic_sum.get(j) + word_vector.get(j);
+                topic_sum.put(j,new_v);
+            }
+        }
+        Vector<Vector<Double>> sentence_vec = new Vector<>();
+        Vector<Double>  topic_percentages = new Vector<>();
+        for(int t = 0 ; t < topic_sum.size() ; t++){
+            double percent = topic_sum.get(t) / (1.0 * sentence.size());
+            topic_percentages.add(percent);
+        }
+        sentence_vec.add(topic_percentages);
+        return sentence_vec;
+    }
+
     private static Vector<Vector<Double>> normalize_vectors(Vector<Vector<Double>> vectors){
 
         Vector<Vector<Double>> new_v = new Vector<>();
@@ -41,7 +63,6 @@ public class Probabilistic_Interface {
             new_v.add(sum / N);
             vectors.set(i, new_v);
         }
-        System.out.println(vectors);
 
         return vectors;
     }
@@ -60,7 +81,29 @@ public class Probabilistic_Interface {
             new_v.add(max_val);
             vectors.set(i, new_v);
         }
-        System.out.println(vectors);
+
+        return vectors;
+    }
+
+    private static Vector<Vector<Double>>  minimize_vectors(Vector<Vector<Double>> vectors){
+
+        for(int i = 0 ; i < vectors.size(); i++) {
+            double min_val = 0;
+            boolean first_val = true;
+            for (double val : vectors.elementAt(i)) {
+                if(first_val){
+                    min_val = val;
+                    first_val = false;
+                    continue;
+                }
+                if(val < min_val){
+                    min_val = val;
+                }
+            }
+            Vector<Double> new_v = new Vector<>();
+            new_v.add(min_val);
+            vectors.set(i, new_v);
+        }
 
         return vectors;
     }
@@ -129,20 +172,28 @@ public class Probabilistic_Interface {
                     max_sentence_words = terms.length;
                 }
                 //calculation of term representations
-                for (String term : terms) {
 
+                for (String term : terms) {
+                    System.out.print(term+ " ");
                     term = term.toLowerCase();
                     if (TermTopicContribution.containsKey(term)) {
                         sentence.add(TermTopicContribution.get(term));
                     }
                 }
-                System.out.println("\t"+sentence);
+                System.out.print("\n");
                 writer2.write(fields[4]+"\n");
                 //sentence = normalize_vectors(sentence);
                 //sentence = average_vectors(sentence);
-                sentence = maximize_vectors(sentence);
-                topics_num = 1;
-
+                //sentence = maximize_vectors(sentence);
+                //sentence = minimize_vectors(sentence);
+                //topics_num = 1;
+                System.out.println(sentence);
+                if(sentence.size() == 0){
+                    System.out.println("Sentence "+i);
+                    System.exit(0);
+                }
+                //sentence = reduce_dimensions(sentence);
+                //max_sentence_words = -1;
                 sentence_representations.add(sentence);
             }
         }
@@ -151,11 +202,18 @@ public class Probabilistic_Interface {
         for(int i = 0 ; i < topics_num ; i++){
             pad_vector.add(0.0);
         }
+
+
         for(Vector<Vector<Double>> sentence : sentence_representations ){
             int sentence_words = sentence.size();
             while(sentence_words < max_sentence_words){
                 sentence.add(pad_vector);
                 sentence_words++;
+            }
+            if(max_sentence_words == -1){ //reduced sentence
+                Vector<Double> actual_sentence = sentence.get(0);
+                writer.write(actual_sentence+"\n");
+                continue;
             }
             writer.write(sentence+"\n");
         }
