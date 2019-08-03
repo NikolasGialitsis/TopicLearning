@@ -1,4 +1,5 @@
-# Sequence Encoding
+# README OUTDATED
+# Sequence Encoding OUTDATED 
 ## Implemented two word representations
 * ### TFIDF_Representation (done -to be implemented with input from file or tokenization)
   
