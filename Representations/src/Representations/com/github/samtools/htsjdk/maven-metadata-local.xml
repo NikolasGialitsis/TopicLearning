@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.github.samtools</groupId>
+  <artifactId>htsjdk</artifactId>
+  <versioning>
+    <versions>
+      <version>2.21.0-3-gf3d09c8-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20191121032842</lastUpdated>
+  </versioning>
+</metadata>

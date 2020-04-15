@@ -134,7 +134,9 @@ public class Probabilistic_Interface {
 
 
         System.out.println("Topics num : "+topics_num);
-        String mallet_instances_path = directory_path+"/"+mode+"_sentences.txt";
+        //String mallet_instances_path = directory_path+"/"+mode+"_sentences.txt";
+        String mallet_instances_path = directory_path+"/documents.txt";
+ 
         Probabilistic_Representation model  = null;
         if(mode.equals("test")) {
             model = new Probabilistic_Representation(mallet_instances_path, topics_num, stop_words_path,true);

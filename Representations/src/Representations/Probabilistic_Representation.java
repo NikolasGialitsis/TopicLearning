@@ -157,6 +157,54 @@ class Probabilistic_Representation {
             PrintWriter out = new PrintWriter(new FileOutputStream("TopicModelSummary.inf"));
             out.println("\n=== TopicWordWeights");
             model.printTopicWordWeights(out);
+
+            // Estimate the topic distribution of the first instance,
+            //  given the current Gibbs state.
+            List<List<Double>> list = new ArrayList<>();
+
+            for( int i = 0 ; i < this.instances_num ; i++){
+                //System.out.println("Instance :"+i);
+                // Show the words and topics in the first instance
+
+                // The data alphabet maps word IDs to strings
+                Alphabet dataAlphabet = instances.getDataAlphabet();
+
+                FeatureSequence tokens = (FeatureSequence) model.getData().get(i).instance.getData();
+                LabelSequence topics = model.getData().get(i).topicSequence;
+
+
+                Formatter out = new Formatter(new StringBuilder(), Locale.US);
+                for (int position = 0; position < tokens.getLength(); position++) {
+                    out.format("%s-%d ", dataAlphabet.lookupObject(tokens.getIndexAtPosition(position)),
+                           topics.getIndexAtPosition(position));
+                }
+                //System.out.println(out);
+
+                // Estimate the topic distribution of the first instance,
+                //  given the current Gibbs state.
+                double[] topicDistribution = model.getTopicProbabilities(i);
+
+                // Get an array of sorted sets of word ID/count pairs
+               ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
+
+                // Show top 10 words in topics with proportions for the first document
+                for (int topic = 0; topic < topics_num; topic++) {
+                    Iterator<IDSorter> iterator = topicSortedWords.get(topic).iterator();
+                    //out = new Formatter(new StringBuilder(), Locale.US);
+                    //out.format("%d\t%.3f\t", topic, topicDistribution[topic]);
+                    int rank = 0;
+                    while (iterator.hasNext() && rank < 10) {
+                        IDSorter idCountPair = iterator.next();
+                        //out.format("%s (%.0f) ", dataAlphabet.lookupObject(idCountPair.getID()), idCountPair.getWeight());
+                        Object obj = dataAlphabet.lookupObject(idCountPair.getID());
+                        top_words_list.putIfAbsent(obj.toString(),0);
+                        int occurrences = top_words_list.get(obj.toString()) + 1;
+                        top_words_list.put(obj.toString(),occurrences);
+                        rank++;
+                    }
+                    //System.out.println(out);
+                }
+            }
         }
         else{  // load old term topic contributions
             model = load_topics("topic_model.mallet");

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.google.guava</groupId>
+  <artifactId>guava</artifactId>
+  <versioning>
+    <latest>24.0-jre-SNAPSHOT</latest>
+    <release></release>
+    <versions>
+      <version>HEAD-android-SNAPSHOT</version>
+      <version>HEAD-jre-SNAPSHOT</version>
+      <version>22.0-SNAPSHOT</version>
+      <version>22.0-android-SNAPSHOT</version>
+      <version>23.0-SNAPSHOT</version>
+      <version>23.0-android-SNAPSHOT</version>
+      <version>24.0-SNAPSHOT</version>
+      <version>24.0-android-SNAPSHOT</version>
+      <version>24.0-jre-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20190611220208</lastUpdated>
+  </versioning>
+</metadata>
