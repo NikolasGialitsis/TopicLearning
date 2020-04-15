@@ -6,7 +6,7 @@ echo 'Convert json to readable format for testing set...'
 python Json2Text.py -test;
 echo '...Done!'
 echo 'Compiling Probabilistic_Interface...'
-javac -cp ".:/home/superuser/Mallet/dist/mallet.jar:/home/superuser/Mallet/dist/mallet-depts.jar:/home/superuser/Mallet/lib/mallet-depts.jar:/home/superuser/Mallet/lib/derby.jar;" Probabilistic_Interface.java
+javac -cp ".:/home/superuser/Mallet/dist/mallet.jar:/home/superuser/Mallet/dist/mallet-deps.jar:/home/superuser/Mallet/lib/mallet-deps.jar:/home/superuser/Mallet/lib/derby.jar;" Probabilistic_Interface.java
 echo '...Done!'
 echo 'Get representations for training set...'
 java Probabilistic_Interface -train -topics 16 -dataset multiling -path /home/superuser/SequenceEncoding/Representations -stop /home/superuser/SequenceEncoding/Representations/stopwords.txt;
